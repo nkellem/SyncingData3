@@ -28,14 +28,17 @@ const handleCollisions = () => {
   }
 };
 
-const handleInput = () => {
+const handleInput = (socket) => {
+  const sock = socket;
   window.addEventListener('keydown', e => {
     if (e.keyCode === 37) {
       users[user].x -= 5;
+      socket.emit('updateUserServer', {x: users[user].x, y: users[user].y});
     }
 
     if (e.keyCode === 39) {
       users[user].x += 5;
+      socket.emit('updateUserServer', {x: users[user].x, y: users[user].y});
     }
   });
 };
@@ -66,10 +69,18 @@ const init = () => {
 
   socket.on('playerJoined', data => {
     users[data.user] = {width: data.width, height: data.height, x: data.x, y: data.y};
-    console.log(users);
   });
 
-  handleInput();
+  socket.on('updateUserClient', data => {
+    users[data.user].x = data.x;
+    users[data.user].y = data.y;
+  });
+
+  socket.on('userLeft', data => {
+    delete users[data];
+  });
+
+  handleInput(socket);
   setInterval(() => {
     handleCollisions();
     draw();

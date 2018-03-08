@@ -47,11 +47,22 @@ const onUserJump = sock => {
   socket.on('jump')
 };
 
+const onUpdateUserServer = sock => {
+  const socket = sock;
+
+  socket.on('updateUserServer', data => {
+    users[socket.name].x = data.x;
+    users[socket.name].y = data.y;
+    socket.broadcast.emit('updateUserClient', {user: socket.name, x: data.x, y: data.y});
+  });
+}
+
 const onDisconnect = sock => {
   const socket = sock;
 
   socket.on('disconnect', () => {
     socket.leave('room1');
+    socket.broadcast.emit('userLeft', socket.name);
     delete users[socket.name];
   });
 };
@@ -60,6 +71,7 @@ io.sockets.on('connection', socket => {
   console.log('started');
 
   onJoined(socket);
+  onUpdateUserServer(socket);
   onDisconnect(socket);
 });
 
