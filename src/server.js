@@ -31,25 +31,25 @@ const users = {};
 
 const onJoined = sock => {
   const socket = sock;
-  
+
   socket.on('join', data => {
     socket.join('room1');
     socket.name = data.user;
     users[data.user] = {width: data.width, height: data.height, x: data.x, y: data.y};
     socket.emit('sendUsers', users);
-    //socket.broadcast.emit('playerJoined', data);
+    socket.broadcast.emit('playerJoined', data);
   });
 };
 
 const onUserJump = sock => {
   const socket = sock;
-  
+
   socket.on('jump')
 };
 
 const onDisconnect = sock => {
   const socket = sock;
-  
+
   socket.on('disconnect', () => {
     socket.leave('room1');
     delete users[socket.name];
@@ -58,7 +58,7 @@ const onDisconnect = sock => {
 
 io.sockets.on('connection', socket => {
   console.log('started');
-  
+
   onJoined(socket);
   onDisconnect(socket);
 });

@@ -18,16 +18,28 @@ const draw = () => {
   });
 };
 
+const handleCollisions = () => {
+  if (users[user].x < 0) {
+    users[user].x = 0;
+  }
+
+  if (users[user].x > 900) {
+    users[user].x = 900;
+  }
+
+  if (users[user].y > 600) {
+    users[user].y = 600;
+  }
+};
+
 const handleInput = () => {
-  canvas.addEventListener('keydown', e => {
+  window.addEventListener('keydown', e => {
     if (e.keyCode === 37) {
-      users[user].x -= 1;
-      draw();
+      users[user].x -= 5;
     }
 
     if (e.keyCode === 39) {
-      users[user].x += 1;
-      draw();
+      users[user].x += 5;
     }
   });
 };
@@ -56,8 +68,16 @@ const init = () => {
     users = data;
   });
 
+  socket.on('playerJoined', data => {
+    users[data.user] = { width: data.width, height: data.height, x: data.x, y: data.y };
+    console.log(users);
+  });
+
   handleInput();
-  draw();
+  setInterval(() => {
+    handleCollisions();
+    draw();
+  }, 1000 / 30);
 };
 
 window.onload = init;
