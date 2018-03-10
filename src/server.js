@@ -35,7 +35,7 @@ const onJoined = sock => {
   socket.on('join', data => {
     socket.join('room1');
     socket.name = data.user;
-    users[data.user] = {width: data.width, height: data.height, x: data.x, y: data.y};
+    users[data.user] = {width: data.width, height: data.height, x: data.x, y: data.y, destX: data.destX, destY: data.destY, jumping: data.jumping};
     socket.emit('sendUsers', users);
     socket.broadcast.emit('playerJoined', data);
   });
@@ -53,7 +53,9 @@ const onUpdateUserServer = sock => {
   socket.on('updateUserServer', data => {
     users[socket.name].x = data.x;
     users[socket.name].y = data.y;
-    socket.broadcast.emit('updateUserClient', {user: socket.name, x: data.x, y: data.y});
+    users[socket.name].destX = data.destX;
+    users[socket.name].destY = data.destY;
+    socket.broadcast.emit('updateUserClient', {user: socket.name, x: data.x, y: data.y, destX: data.destX, destY: data.destY});
   });
 }
 
@@ -74,5 +76,9 @@ io.sockets.on('connection', socket => {
   onUpdateUserServer(socket);
   onDisconnect(socket);
 });
+
+setInterval(() => {
+  io.sockets.in('room1').emit('gravity', {gravity: 50});
+}, 1000/30);
 
 console.log('Websockets server started');
